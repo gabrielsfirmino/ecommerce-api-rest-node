@@ -1,5 +1,4 @@
 module.exports = (app, db) => {
-
   // GET all products
   app.get('/products', (req, res) => {
     db.products.findAll()
@@ -9,10 +8,10 @@ module.exports = (app, db) => {
   });
 
   // GET one product by id
-  app.get('/product/:id', (req, res) => {
+  app.get('/products/:id', (req, res) => {
     const id = req.params.id;
     db.products.find({
-      where: { id: id}
+      where: { id: id }
     })
       .then(product => {
         res.json(product);
@@ -20,7 +19,7 @@ module.exports = (app, db) => {
   });
 
   // POST single product
-  app.post('/product', (req, res) => {
+  app.post('/products', (req, res) => {
     const product = req.body;
     db.products.create({
       ...product
@@ -31,7 +30,7 @@ module.exports = (app, db) => {
   });
 
   // PATCH single product
-  app.put('/product/:id', (req, res) => {
+  app.put('/products/:id', (req, res) => {
     const updates = req.body;
     const id = req.params.id
     db.products.find({
@@ -41,18 +40,18 @@ module.exports = (app, db) => {
         return product.updateAttributes(updates)
       })
       .then(updatedProduct => {
-        deletedProduct ? res.status(200).json(updatedProduct) : res.status(404).json({message: "Fail update!"});;
+        deletedProduct ? res.status(200).json(updatedProduct) : res.status(404).json({ message: "Fail update!" });;
       });
   });
 
   // DELETE single product
-  app.delete('/product/:id', (req, res) => {
+  app.delete('/products/:id', (req, res) => {
     const id = req.params.id;
     return db.products.destroy({
       where: { id: id }
     })
       .then(deletedProduct => {
-        return deletedProduct ? res.status(200).json({message: "Successed removed!"}) : res.status(404).json({message: "Fail remove!"});
+        return deletedProduct ? res.status(200).json({ message: "Successed removed!" }) : res.status(404).json({ message: "Fail remove!" });
       })
   });
 };

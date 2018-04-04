@@ -1,6 +1,7 @@
 const routes = [
   require('./users'),
-  require('./products')
+  require('./products'),
+  require('./auth')
 ];
 
 module.exports = function router(app, db) {

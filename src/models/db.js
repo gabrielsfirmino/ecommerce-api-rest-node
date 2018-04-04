@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize('dbshow', 'root', 'root', {
   host: 'localhost',
   dialect: 'mysql',
+  operatorsAliases: false,
 });
 
 // Connect all the models/tables in the database to a db object,
