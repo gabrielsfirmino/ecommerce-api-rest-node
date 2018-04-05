@@ -6,7 +6,7 @@ module.exports = (app, db) => {
   app.get('/users', (req, res) => {
     db.users.findAll()
       .then(users => {
-        // log(req.body.user, 'LIST', 'USER', ?,Date.now(), AWS);
+        log(req.user, 'LIST', 'USER', req.body.user.name, Date.now(), AWS);
         res.json(users);
       });
   });
