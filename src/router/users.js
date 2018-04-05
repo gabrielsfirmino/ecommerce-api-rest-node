@@ -1,8 +1,6 @@
 const AWS = require('aws-sdk');
 const log = require('../log');
 
-AWS.config.loadFromPath('./dynamoCredential.json');
-
 module.exports = (app, db) => {
   // GET all owners
   app.get('/users', (req, res) => {
