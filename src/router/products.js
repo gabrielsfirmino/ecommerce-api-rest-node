@@ -3,6 +3,7 @@ module.exports = (app, db) => {
   app.get('/products', (req, res) => {
     db.products.findAll()
       .then(products => {
+        log(req.user, 'LIST', 'PRODUCT', '', Date.now(), AWS);
         res.json(products);
       });
   });
@@ -14,6 +15,7 @@ module.exports = (app, db) => {
       where: { id: id }
     })
       .then(product => {
+        log(req.user, 'SEARCH', 'PRODUCT', req.body.product.name, Date.now(), AWS);
         res.json(product);
       });
   });
@@ -25,6 +27,7 @@ module.exports = (app, db) => {
       ...product
     })
       .then(newProduct => {
+        log(req.user, 'INSERT', 'PRODUCT', req.body.product.name, Date.now(), AWS);
         res.json(newProduct);
       })
   });
@@ -37,6 +40,7 @@ module.exports = (app, db) => {
       where: { id: id }
     })
       .then(product => {
+        log(req.user, 'ALTER', 'PRODUCT', req.body.user.name, Date.now(), AWS);
         return product.updateAttributes(updates)
       })
       .then(updatedProduct => {
@@ -51,6 +55,7 @@ module.exports = (app, db) => {
       where: { id: id }
     })
       .then(deletedProduct => {
+        log(req.user, 'DELETE', 'PRODUCT', req.body.product.name, Date.now(), AWS);
         return deletedProduct ? res.status(200).json({ message: "Successed removed!" }) : res.status(404).json({ message: "Fail remove!" });
       })
   });
