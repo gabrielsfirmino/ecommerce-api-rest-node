@@ -4,8 +4,8 @@ const routes = [
   require('./auth')
 ];
 
-module.exports = function router(app, db) {
+module.exports = function router(app, db, lag, AWS) {
   return routes.forEach((route) => {
-    route(app, db);
+    route(app, db, lag, AWS);
   });
 };

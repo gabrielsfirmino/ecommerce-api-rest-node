@@ -6,7 +6,7 @@ module.exports = (app, db) => {
   app.get('/users', (req, res) => {
     db.users.findAll()
       .then(users => {
-        log(req.user, 'LIST', 'USER', '', Date.now(), AWS);
+        log(req.user.name, 'LIST', 'USER', '', Date.now(), AWS);
         res.json(users);
       });
   });
@@ -18,8 +18,8 @@ module.exports = (app, db) => {
       where: { id: id }
     })
       .then(user => {
-        log(req.user, 'SEARCH', 'USER', req.body.user.name, Date.now(), AWS);
         user ? res.json(user) : res.status(404).json({ message: "Can't find this user" });
+        log(req.user.name, 'SEARCH', 'USER', user.name, Date.now(), AWS);
       });
   });
 
@@ -30,7 +30,7 @@ module.exports = (app, db) => {
       ...user
     })
       .then(newUser => {
-        log(req.user, 'INSERT', 'USER', req.body.user.name, Date.now(), AWS);
+        log(req.user.name, 'INSERT', 'USER', newUser.name, Date.now(), AWS);
         res.json(newUser);
       })
   });
@@ -46,7 +46,7 @@ module.exports = (app, db) => {
         return user.updateAttributes(updates)
       })
       .then(updatedUser => {
-        log(req.user, 'ALTER', 'USER', req.body.user.name, Date.now(), AWS);
+        log(req.user.name, 'ALTER', 'USER', updatedUser.name, Date.now(), AWS);
         res.json(updatedUser);
       })
       .catch(() => {
@@ -61,7 +61,7 @@ module.exports = (app, db) => {
       where: { id: id }
     })
       .then(deletedUser => {
-        log(req.user, 'DELETE', 'USER', req.body.user.name, Date.now(), AWS);
+        log(req.user.name, 'DELETE', 'USER', deletedUser.name, Date.now(), AWS);
         return deletedUser ? res.status(200).json({ message: "Successed removed!" }) : res.status(404).json({ message: "Fail remove!" });
       });
   });
