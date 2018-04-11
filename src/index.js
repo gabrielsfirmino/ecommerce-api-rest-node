@@ -6,6 +6,9 @@ const lag = require('./log');
 const cors = require('cors')
 const passport = require('passport');
 const AWS = require('aws-sdk');
+
+AWS.config.loadFromPath('./src/data.json');
+
 require('./auth/passport')(db);
 
 const app = express();

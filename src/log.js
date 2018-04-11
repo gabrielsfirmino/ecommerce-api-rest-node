@@ -1,7 +1,7 @@
 module.exports = function (login, operation, type, user, timestamp, aws) {
 
   var docClient = new aws.DynamoDB.DocumentClient();
-  var table = 'logInfo';
+  var table = 'logNovo';
 
   console.log(login, operation, type, user, timestamp);
 
