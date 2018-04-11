@@ -9,6 +9,7 @@ module.exports = (app, db) => {
 
   // GET one product by id
   app.get('/products/:id', (req, res) => {
+    // console.log(req.user.phone);
     const id = req.params.id;
     db.products.find({
       where: { id: id }
@@ -40,7 +41,7 @@ module.exports = (app, db) => {
         return product.updateAttributes(updates)
       })
       .then(updatedProduct => {
-        deletedProduct ? res.status(200).json(updatedProduct) : res.status(404).json({ message: "Fail update!" });;
+        updatedProduct ? res.status(200).json(updatedProduct) : res.status(404).json({ message: "Fail update!" });;
       });
   });
 
