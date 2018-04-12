@@ -1,4 +1,28 @@
+const log = require('../log');
+const multer = require("multer");
+const multerS3 = require('multer-s3');
+const crypto = require("crypto");
+const mime = require("mime");
+
 module.exports = (app, db, log, AWS) => {
+
+  const s3 = new AWS.S3();
+
+  const upload = multer({
+    storage: multerS3({
+      s3: s3,
+      bucket: 'tiltagram',
+      acl: 'public-read',
+      key: function (req, file, cb) {
+        console.log(file)
+        crypto.pseudoRandomBytes(16, function (err, raw) {
+          cb(null, raw.toString('hex') + Date.now() + '.' + mime.getExtension(file.mimetype));
+        });
+      }
+    })
+  });
+
+
   // GET all products
   app.get('/products', (req, res) => {
     db.products.findAll()
@@ -21,8 +45,9 @@ module.exports = (app, db, log, AWS) => {
   });
 
   // POST single product
-  app.post('/products', (req, res) => {
+  app.post('/products', upload.single('photo'), (req, res) => {
     const product = req.body;
+    product.photo = req.file.location;
     db.products.create({
       ...product
     })
@@ -33,8 +58,9 @@ module.exports = (app, db, log, AWS) => {
   });
 
   // PATCH single product
-  app.put('/products/:id', (req, res) => {
+  app.put('/products/:id', upload.single('photo'), (req, res) => {
     const updates = req.body;
+    updates.photo = req.file.location;
     const id = req.params.id
     db.products.find({
       where: { id: id }

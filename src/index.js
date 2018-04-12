@@ -22,7 +22,9 @@ app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
+
 app.options('*', cors())
+
 app.use('/products', passport.authenticate('jwt', { session: false }), cors());
 app.use('/users', passport.authenticate('jwt', { session: false }));
 

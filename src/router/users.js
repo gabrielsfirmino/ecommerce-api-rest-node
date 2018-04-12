@@ -1,12 +1,31 @@
 const AWS = require('aws-sdk');
 const log = require('../log');
+const multer = require("multer");
+const multerS3 = require('multer-s3');
+const crypto = require("crypto");
+const mime = require("mime");
+
+const s3 = new AWS.S3();
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: 'contatosf30',
+    acl: 'public-read',
+    key: function (req, file, cb) {
+      crypto.pseudoRandomBytes(16, function (err, raw) {
+        cb(null, raw.toString('hex') + Date.now() + '.' + mime.extension(file.mimetype));
+      });
+    }
+  })
+});
 
 module.exports = (app, db) => {
   // GET all owners
   app.get('/users', (req, res) => {
     db.users.findAll()
       .then(users => {
-        log(req.user.name, 'LIST', 'USER', '', Date.now(), AWS);
+        log(req.user.name, 'LIST', 'USER', null, Date.now(), AWS);
         res.json(users);
       });
   });
@@ -19,7 +38,7 @@ module.exports = (app, db) => {
     })
       .then(user => {
         user ? res.json(user) : res.status(404).json({ message: "Can't find this user" });
-        log(req.user.name, 'SEARCH', 'USER', user.name, Date.now(), AWS);
+        log(req.user.name, 'VIEW', 'USER', user.name, Date.now(), AWS);
       });
   });
 
@@ -64,5 +83,15 @@ module.exports = (app, db) => {
         log(req.user.name, 'DELETE', 'USER', deletedUser.name, Date.now(), AWS);
         return deletedUser ? res.status(200).json({ message: "Successed removed!" }) : res.status(404).json({ message: "Fail remove!" });
       });
+  });
+  app.post('/register', (req, res) => {
+    const user = req.body;
+    db.users.create({
+      ...user
+    })
+      .then(newUser => {
+        log('ANON', 'INSERT', 'USER', newUser.name, Date.now(), AWS);
+        res.json(newUser);
+      })
   });
 };
