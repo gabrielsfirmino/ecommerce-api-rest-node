@@ -1,8 +1,10 @@
-const log = require('../log');
 const multer = require("multer");
 const multerS3 = require('multer-s3');
 const crypto = require("crypto");
 const mime = require("mime");
+const sequelize = require('sequelize')
+
+const op = sequelize.Op
 
 module.exports = (app, db, log, AWS) => {
 
@@ -29,7 +31,24 @@ module.exports = (app, db, log, AWS) => {
       .then(products => {
         log(req.user.name, 'LIST', 'PRODUCT', '', Date.now(), AWS);
         res.json(products);
-      });
+      })
+      .catch(() => {
+        res.status(404).json({ message: "Something went wrong" });
+      })
+  });
+  app.get('/products/search', (req, res) => {
+    const id = req.params.id;
+    db.products.findOne({
+      where: { name: { [op.like]: `%${req.query.name}%` } }
+    })
+      .then(product => {
+        log(req.user.name, 'SEARCH', 'PRODUCT', product.name, Date.now(), AWS);
+        res.json(product);
+      })
+      .catch((error) => {
+        console.log(error)
+        res.send(error)
+      })
   });
 
   // GET one product by id
@@ -41,7 +60,10 @@ module.exports = (app, db, log, AWS) => {
       .then(product => {
         log(req.user.name, 'SEARCH', 'PRODUCT', product.name, Date.now(), AWS);
         res.json(product);
-      });
+      })
+      .catch(() => {
+        res.status(404).json({ message: "Something went wrong" });
+      })
   });
 
   // POST single product
@@ -54,6 +76,9 @@ module.exports = (app, db, log, AWS) => {
       .then(newProduct => {
         log(req.user.name, 'INSERT', 'PRODUCT', newProduct.name, Date.now(), AWS);
         res.json(newProduct);
+      })
+      .catch(() => {
+        res.status(404).json({ message: "Something went wrong" });
       })
   });
 
@@ -71,7 +96,10 @@ module.exports = (app, db, log, AWS) => {
       })
       .then(updatedProduct => {
         updatedProduct ? res.status(200).json(updatedProduct) : res.status(404).json({ message: "Fail update!" });;
-      });
+      })
+      .catch(() => {
+        res.status(404).json({ message: "Something went wrong" });
+      })
   });
 
   // DELETE single product
@@ -83,6 +111,9 @@ module.exports = (app, db, log, AWS) => {
       .then(deletedProduct => {
         log(req.user.name, 'DELETE', 'PRODUCT', deletedProduct.name, Date.now(), AWS);
         return deletedProduct ? res.status(200).json({ message: "Successed removed!" }) : res.status(404).json({ message: "Fail remove!" });
+      })
+      .catch(() => {
+        res.status(404).json({ message: "Something went wrong" });
       })
   });
 };
