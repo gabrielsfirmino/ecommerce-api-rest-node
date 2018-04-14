@@ -2,6 +2,9 @@ const multer = require("multer");
 const multerS3 = require('multer-s3');
 const crypto = require("crypto");
 const mime = require("mime");
+const sequelize = require('sequelize')
+
+const op = sequelize.Op
 
 module.exports = (app, db, log, AWS) => {
 
@@ -34,6 +37,19 @@ module.exports = (app, db, log, AWS) => {
       })
   });
 
+  app.get('/users/search', (req, res) => {
+    db.users.findAll({
+      where: { name: { [op.like]: `%${req.query.name}%` } }
+    })
+      .then(user => {
+        log(req.user.name, 'SEARCH', 'USER', req.query.name, Date.now(), AWS);
+        res.json(user);
+      })
+      .catch((error) => {
+        res.send(error)
+      })
+  });
+
   // GET one owner by id
   app.get('/users/:id', (req, res) => {
     const id = req.params.id;
@@ -48,6 +64,8 @@ module.exports = (app, db, log, AWS) => {
         res.status(404).json({ message: "Something went wrong" });
       })
   });
+
+
 
   // POST single owner
   app.post('/users', upload.single('photo'), (req, res) => {

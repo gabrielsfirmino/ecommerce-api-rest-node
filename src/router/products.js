@@ -37,16 +37,14 @@ module.exports = (app, db, log, AWS) => {
       })
   });
   app.get('/products/search', (req, res) => {
-    const id = req.params.id;
-    db.products.findOne({
+    db.products.findAll({
       where: { name: { [op.like]: `%${req.query.name}%` } }
     })
-      .then(product => {
-        log(req.user.name, 'SEARCH', 'PRODUCT', product.name, Date.now(), AWS);
-        res.json(product);
+      .then(products => {
+        log(req.user.name, 'SEARCH', 'PRODUCT', products.name, Date.now(), AWS);
+        res.json(products);
       })
       .catch((error) => {
-        console.log(error)
         res.send(error)
       })
   });
