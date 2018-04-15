@@ -7,7 +7,7 @@ const sequelize = require('sequelize')
 const op = sequelize.Op
 
 module.exports = (app, db, log, AWS) => {
-
+  const ses = new AWS.SES();
   const s3 = new AWS.S3();
 
   const upload = multer({
@@ -26,15 +26,50 @@ module.exports = (app, db, log, AWS) => {
 
 
   // GET all owners
-  app.get('/users', (req, res) => {
-    db.users.findAll()
-      .then(users => {
-        log(req.user.name, 'LIST', 'USER', null, Date.now(), AWS);
-        res.json(users);
-      })
-      .catch(() => {
-        res.status(404).json({ message: "Something went wrong" });
-      })
+  app.post('/products/send-mail', (req, res) => {
+    var params = {
+      EmailAddress: req.user.login
+    };
+
+    ses.verifyEmailAddress(params, function (err, data) {
+      if (err) {
+        res.send(err);
+      }
+      else {
+        var ses_mail = "From: 'AWS Tutorial Series' <" + req.user.login + ">\n";
+        ses_mail = ses_mail + "To: " + req.user.login + "\n";
+        ses_mail = ses_mail + "Subject: AWS Work product list\n";
+        ses_mail = ses_mail + "MIME-Version: 1.0\n";
+        ses_mail = ses_mail + "Content-Type: multipart/mixed; boundary=\"NextPart\"\n\n";
+        ses_mail = ses_mail + "--NextPart\n";
+        ses_mail = ses_mail + "Content-Type: text/html; charset=us-ascii\n\n";
+        console.log(req.body);
+        ses_mail = ses_mail + `Aqui estão os itens comprados na loja: ${req.body}`;
+
+        var params = {
+          RawMessage: { Data: new Buffer(ses_mail) },
+          Destinations: [req.user.login],
+          Source: "'AWS mail' <" + req.user.login + ">'"
+        };
+
+        ses.sendRawEmail(params, function (err, data) {
+          if (err) {
+            res.send(err);
+          }
+          else {
+            res.send(data);
+          }
+        });
+      }
+    });
+    // db.users.findAll()
+    //   .then(users => {
+    //     log(req.user.name, 'LIST', 'USER', null, Date.now(), AWS);
+    //     res.json(users);
+    //   })
+    //   .catch(() => {
+    //     res.status(404).json({ message: "Something went wrong" });
+    //   })
   });
 
   app.get('/users/search', (req, res) => {
@@ -63,6 +98,9 @@ module.exports = (app, db, log, AWS) => {
       .catch(() => {
         res.status(404).json({ message: "Something went wrong" });
       })
+  });
+  app.get('/send', (req, res) => {
+
   });
 
 

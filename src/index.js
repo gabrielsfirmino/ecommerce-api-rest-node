@@ -9,6 +9,7 @@ const AWS = require('aws-sdk');
 
 AWS.config.loadFromPath('./src/data.json');
 
+console.log(AWS.config)
 require('./auth/passport')(db);
 
 const app = express();

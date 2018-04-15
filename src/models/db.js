@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('dbshow', 'root', 'root', {
-  host: 'localhost',
+const sequelize = new Sequelize('dbshow', 'root', 'victorsilent', {
+  host: 'dbshow.cupyjcdlzl8d.us-west-2.rds.amazonaws.com',
   dialect: 'mysql',
   operatorsAliases: false,
 });
