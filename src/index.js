@@ -5,11 +5,7 @@ const db = require('./models/db');
 const lag = require('./log');
 const cors = require('cors')
 const passport = require('passport');
-const AWS = require('aws-sdk');
 
-AWS.config.loadFromPath('./src/data.json');
-
-console.log(AWS.config)
 require('./auth/passport')(db);
 
 const app = express();
@@ -29,10 +25,10 @@ app.options('*', cors())
 app.use('/products', passport.authenticate('jwt', { session: false }), cors());
 app.use('/users', passport.authenticate('jwt', { session: false }));
 
-router(app, db, lag, AWS);
+router(app, db, lag);
 
 db.sequelize.sync().then(() => {
-  app.listen(3000, () => {
+  app.listen(8080, () => {
     console.log('Express listening on port:', 3000);
   });
 });

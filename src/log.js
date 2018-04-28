@@ -1,13 +1,17 @@
-module.exports = function (login, operation, type, user, timestamp, aws) {
+const Datastore = require('@google-cloud/datastore');
+module.exports = function (login, operation, type, user, timestamp) {
 
-  var docClient = new aws.DynamoDB.DocumentClient();
-  var table = 'logNovo';
+  const gcs = Datastore({
+    projectId: 'cloud30-201916',
+    keyFilename: __dirname + '/router/key.json'
+  });
 
   console.log(login, operation, type, user, timestamp);
 
-  var params = {
-    TableName: table,
-    Item: {
+  const key = gcs.key(['teste', timestamp]);
+  var log = {
+    key: key,
+    data: {
       "login": login,
       "operation": operation,
       "type": type,
@@ -16,8 +20,12 @@ module.exports = function (login, operation, type, user, timestamp, aws) {
     }
   };
 
-  docClient.put(params, function (err, data) {
-    if (err)
-      console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-  });
+  gcs
+    .save(log)
+    .then((log) => {
+      console.log(log);
+    })
+    .catch(err => {
+      console.error('ERROR:', err);
+    });
 }
