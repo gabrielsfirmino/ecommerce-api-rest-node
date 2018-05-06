@@ -5,6 +5,7 @@ const sequelize = require('sequelize')
 const imgUpload = require('./imageUploader');
 
 
+
 const op = sequelize.Op
 
 module.exports = (app, db, log) => {
@@ -55,7 +56,7 @@ module.exports = (app, db, log) => {
   });
 
   // POST single product
-  app.post('/products', upload.single('photo'), (req, res) => {
+  app.post('/products', upload.single('photo'), imgUpload.uploadToGcs, (req, res) => {
     const product = req.body;
     if (req.file && req.file.cloudStoragePublicUrl) {
       product.photo = req.file.cloudStoragePublicUrl;
@@ -84,7 +85,7 @@ module.exports = (app, db, log) => {
     })
       .then(product => {
         log(req.user.name, 'ALTER', 'PRODUCT', product.name, Date.now());
-        return product.updateAttributes(updates)
+        return product.updateAttributes(product)
       })
       .then(updatedProduct => {
         updatedProduct ? res.status(200).json(updatedProduct) : res.status(404).json({ message: "Fail update!" });;

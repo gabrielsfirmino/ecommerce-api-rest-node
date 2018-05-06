@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const mime = require("mime");
 const sequelize = require('sequelize')
 const imgUpload = require('./imageUploader');
+const nodemailer = require('nodemailer');
 
 const upload = Multer({
   storage: Multer.MemoryStorage,
@@ -26,9 +27,27 @@ module.exports = (app, db, log) => {
   });
 
   app.post('/products/send-mail', (req, res) => {
-    const params = {
-      EmailAddress: req.user.login
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'joaovpbarbosa@gmail.com',
+        pass: ENV.MYPASSATGOOGLEENV
+      }
+    });
+    const mailOptions = {
+      from: 'joaovpbarbosa@gmail.com', // sender address
+      to: req.user.login, // list of receivers
+      subject: 'Suas compras', // Subject line
+      html: `<div>Products: ${req.products}</div>`// plain text body
     };
+
+    transporter.sendMail(mailOptions, function (err, info) {
+      if (err)
+        res.status(404).json({ message: "Something went wrong" });
+      else
+        res.json(info);
+    });
+
   });
 
   app.get('/users/search', (req, res) => {
@@ -79,7 +98,7 @@ module.exports = (app, db, log) => {
   });
 
   // PATCH single owner
-  app.put('/users/:id', upload.single('photo'), (req, res) => {
+  app.put('/users/:id', upload.single('photo'), imgUpload.uploadToGcs, (req, res) => {
     const product = req.body;
     if (req.file && req.file.cloudStoragePublicUrl) {
       product.photo = req.file.cloudStoragePublicUrl;
